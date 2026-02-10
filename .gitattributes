@@ -1,0 +1,23 @@
+* text=auto eol=lf
+*.md diff=markdown
+*.py diff=python
+*.vue diff=vue
+*.astro diff=astro
+*.css diff=css
+*.js diff=javascript
+*.ts diff=typescript
+*.json diff=json
+*.html diff=html
+*.xml diff=xml
+*.yaml diff=yaml
+*.yml diff=yaml
+*.sh diff=sh
+*.bash diff=bash
+*.zsh diff=zsh
+*.fish diff=fish
+*.ps1 diff=powershell
+*.bat diff=bat
+*.cmd diff=cmd
+*.md diff=markdown
+*.md diff=markdown
+*.md diff=markdown
