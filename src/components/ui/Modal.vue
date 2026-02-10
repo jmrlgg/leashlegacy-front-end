@@ -1,0 +1,1 @@
+<template><div class='fixed inset-0 bg-black/40'><slot /></div></template>

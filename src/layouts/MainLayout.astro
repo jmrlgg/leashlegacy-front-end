@@ -1,0 +1,191 @@
+---
+import "../styles/global.css";
+
+import Header from "../layouts/Header.astro";
+import Footer from "../layouts/Footer.astro";
+
+const {
+  title = "Leash Legacy K9 Training",
+  description = "We are Leash Legacy K9",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-5RXLK7LG");
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google tag (gtag.js)    .COM SITE  -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3JJ0J7K2WL"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-3JJ0J7K2WL");
+    </script>
+
+    <meta charset="utf-8" />
+
+    <meta property="og:site_name" content="{title}" />
+
+    <link
+      rel="preload"
+      as="image"
+      href="imgs/leashlegacyk9_top_header.webp"
+      type="image/webp"
+      fetchpriority="high"
+    />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Open Graph for Facebook, LinkedIn -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta
+      property="og:image"
+      content="https://leashlegacyk9.com/imgs/leashlegacyk9_profilev02.png"
+    />
+    <meta
+      property="og:url"
+      content="https://leashlegacyk9.com?utm_source=facebook&utm_medium=meta-card&utm_campaign=facebook-share&utm_id=social-card-share"
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content="{description}" />
+    <meta
+      name="twitter:image"
+      content="https://leashlegacyk9.com/imgs/leashlegacyk9_profilev02.png"
+    />
+    <meta
+      name="twitter:url"
+      content="https://leashlegacyk9.com?utm_source=twitter&utm_medium=meta-card&utm_campaign=twitter-share&utm_id=social-card-share"
+    />
+    <meta name="description" content={description} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <meta name="viewport" content="width=device-width" />
+    <!-- old  icon -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "OfferCatalog",
+        "@id": "https://leashlegacyk9.com/#program-catalog",
+        "name": "Leash Legacy K9 Training Programs",
+        "url": "https://leashlegacyk9.com/",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "name": "5-Day Bootcamp",
+            "url": "https://leashlegacyk9.com/programs/5-day-bootcamp/",
+            "category": "Dog Training",
+            "offeredBy": {
+              "@type": "LocalBusiness",
+              "@id": "https://leashlegacyk9.com/#business",
+              "name": "Leash Legacy K9 Training"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Puppy Starter",
+            "url": "https://leashlegacyk9.com/programs/puppy-starter/",
+            "category": "Dog Training",
+            "offeredBy": {
+              "@type": "LocalBusiness",
+              "@id": "https://leashlegacyk9.com/#business",
+              "name": "Leash Legacy K9 Training"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Off-Leash Program",
+            "url": "https://leashlegacyk9.com/programs/off-leash/",
+            "category": "Dog Training",
+            "offeredBy": {
+              "@type": "LocalBusiness",
+              "@id": "https://leashlegacyk9.com/#business",
+              "name": "Leash Legacy K9 Training"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for simple interactivity -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://leashlegacyk9.com/imgs/ico/apple-touch-icon.png"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://leashlegacyk9.com/imgs/ico/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://leashlegacyk9.com/imgs/ico/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/imgs/ico/site.webmanifest" />
+    <style is:global>
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-50 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
+    <Header />
+
+    <main class="mx-auto">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,1 @@
+<template><button class='rounded-xl border px-3 py-2'><slot /></button></template>

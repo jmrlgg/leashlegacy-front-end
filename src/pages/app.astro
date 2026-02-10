@@ -1,0 +1,11 @@
+
+---
+import MainLayout from "../layouts/MainLayout.astro"
+import PiniaProvider from "../components/providers/PiniaProvider.vue"
+import AppShell from "../components/app/AppShell.vue"
+---
+<MainLayout title="LLK9 Dashboard">
+  <PiniaProvider>
+    <AppShell client:load />
+  </PiniaProvider>
+</MainLayout>

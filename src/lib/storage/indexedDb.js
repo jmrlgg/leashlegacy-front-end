@@ -1,0 +1,1 @@
+export async function saveStore(name,data){ console.log('IndexedDB save:',name,data) }

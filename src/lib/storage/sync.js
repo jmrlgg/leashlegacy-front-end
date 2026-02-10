@@ -1,0 +1,1 @@
+export async function syncToServer(name,data){ console.log('Sync to server:',name,data) }
