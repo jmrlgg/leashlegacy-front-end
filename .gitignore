@@ -2,3 +2,12 @@ node_modules
 .env
 __pycache__/
 *.sqlite3
+
+dist
+.astro
+.DS_Store
+.git
+.gitignore
+
+npm-debug.log
+yarn-error.log
