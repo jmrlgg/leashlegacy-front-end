@@ -1,0 +1,123 @@
+name: PR Update Comment (Diff)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment diff summary on every PR update
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+
+            const prNumber = pr.number;
+            const headRef = pr.head.ref;
+            const baseRef = pr.base.ref;
+            const headSha = pr.head.sha;
+            const shortSha = headSha.slice(0, 7);
+            const actor = context.actor;
+            const action = context.payload.action;
+
+            const prUrl = pr.html_url;
+            const commitUrl = `https://github.com/${owner}/${repo}/commit/${headSha}`;
+
+            // PR totals
+            const prData = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const filesChanged = prData.data.changed_files;
+            const additions = prData.data.additions;
+            const deletions = prData.data.deletions;
+
+            // Changed files list
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: prNumber, per_page: 100
+            });
+
+            // Frontend-aware categorization for Astro/Vue repos
+            function categorize(path) {
+              const p = path.toLowerCase();
+
+              if (p.startsWith(".github/")) return "CI";
+              if (p === ".gitignore" || p.startsWith(".vscode/")) return "Repo Meta";
+
+              const configHits = [
+                "astro.config", "vite.config", "tailwind.config", "postcss.config",
+                "tsconfig", "eslint", "prettier", "stylelint",
+                "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"
+              ];
+              if (configHits.some(k => p.includes(k))) return "Config/Tooling";
+
+              if (p.startsWith("public/")) return "Public/Assets";
+
+              if (p.endsWith(".astro")) return "Pages/Layouts (.astro)";
+              if (p.endsWith(".vue")) return "Vue Components (.vue)";
+
+              if (p.startsWith("src/pages/") || p.includes("/pages/")) return "Pages/Routes";
+              if (p.startsWith("src/components/") || p.includes("/components/")) return "Components";
+              if (p.startsWith("src/layouts/") || p.includes("/layouts/")) return "Layouts";
+
+              if (p.includes("/styles/") || p.endsWith(".css") || p.endsWith(".scss")) return "Styles";
+              if (p.startsWith("src/content/") || p.includes("/content/")) return "Content";
+
+              if (p.includes("/tests/") || p.includes("__tests__") || p.includes("cypress") || p.includes("playwright")) return "Tests";
+
+              return "Other";
+            }
+
+            // Category stats
+            const catStats = new Map();
+            for (const f of files) {
+              const cat = categorize(f.filename);
+              const cur = catStats.get(cat) || { count: 0, add: 0, del: 0 };
+              cur.count += 1;
+              cur.add += (f.additions || 0);
+              cur.del += (f.deletions || 0);
+              catStats.set(cat, cur);
+            }
+
+            const sortedCats = [...catStats.entries()]
+              .sort((a,b) => (b[1].count - a[1].count) || ((b[1].add + b[1].del) - (a[1].add + a[1].del)));
+
+            const diffSummaryLines = sortedCats.map(([k,v]) => `- **${k}**: ${v.count} file(s), +${v.add}/-${v.del}`);
+
+            // Top files by churn
+            const churn = (f) => (f.additions || 0) + (f.deletions || 0);
+            const topFiles = [...files]
+              .sort((a,b) => churn(b) - churn(a))
+              .slice(0, 10)
+              .map(f => `- \`${f.filename}\` (${f.status}, +${f.additions}/-${f.deletions})`);
+
+            const body = [
+              `## 🧭 PR Diff Update: #${prNumber}`,
+              `**Action:** \`${action}\` • **By:** @${actor}`,
+              `**Branch:** \`${headRef}\` → \`${baseRef}\``,
+              `**Commit:** \`${shortSha}\``,
+              ``,
+              `### 📊 Change Summary`,
+              `- **Files changed:** ${filesChanged}`,
+              `- **Additions:** +${additions}`,
+              `- **Deletions:** -${deletions}`,
+              ``,
+              `### 🧱 Diff Summary (frontend buckets)`,
+              ...(diffSummaryLines.length ? diffSummaryLines : ["- (no files listed)"]),
+              ``,
+              `### 🔥 Biggest File Changes (top 10)`,
+              ...(topFiles.length ? topFiles : ["- (none)"]),
+              ``,
+              `### 🔗 Links`,
+              `- PR: ${prUrl}`,
+              `- Commit: ${commitUrl}`,
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: prNumber, body
+            });
