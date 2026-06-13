@@ -1,0 +1,434 @@
+---
+/**
+ * GallerySection.astro
+ * Responsive, filter-able photo gallery.
+ *
+ * Performance:
+ *  - First 4 images are eager-loaded (above the fold), rest are lazy.
+ *  - Native `sizes` attribute tells the browser exactly how wide
+ *    each image will render so it fetches the smallest useful asset.
+ *  - Filtering is driven by a single `data-filter` attribute on the
+ *    grid — no class-list manipulation loops in JS.
+ *  - CSS `columns` gives a natural masonry layout at every breakpoint.
+ */
+
+const galleryItems = [
+  {
+    id: 1,
+    category: "handlers-course",
+    title: "Handlers Course",
+    image: "/images/gallery/gallery_handlers_1779481858383.png",
+    alt: "Handler receiving leash instructions from a professional trainer",
+    span: "tall",
+  },
+  {
+    id: 2,
+    category: "bootcamp",
+    title: "Bootcamp",
+    image: "/images/gallery/gallery_bootcamp_1779481845580.png",
+    alt: "Group of well-behaved dogs seated during bootcamp",
+    span: "wide",
+  },
+  {
+    id: 3,
+    category: "facility",
+    title: "Our Facility",
+    image: "/images/gallery/gallery_facility_1779481833097.png",
+    alt: "Spacious, well-lit indoor training facility",
+    span: "normal",
+  },
+  {
+    id: 4,
+    category: "staff",
+    title: "Expert Staff",
+    image: "/images/gallery/gallery_staff_1779481820140.png",
+    alt: "Professional trainer working with a German Shepherd",
+    span: "normal",
+  },
+  {
+    id: 5,
+    category: "dogs",
+    title: "Happy Dogs",
+    image: "/images/gallery/gallery_dogs_1779481806442.png",
+    alt: "Happy dog running outdoors",
+    span: "tall",
+  },
+  {
+    id: 6,
+    category: "handlers-course",
+    title: "Advanced Handling",
+    image: "/images/gallery/gallery_handlers_1779481858383.png",
+    alt: "Advanced handler precision training session",
+    span: "normal",
+  },
+  {
+    id: 7,
+    category: "dogs",
+    title: "Active Dogs",
+    image: "/images/gallery/gallery_dogs_1779481806442.png",
+    alt: "Dog in full sprint across open field",
+    span: "wide",
+  },
+  {
+    id: 8,
+    category: "staff",
+    title: "Meet the Team",
+    image: "/images/gallery/gallery_staff_1779481820140.png",
+    alt: "Expert trainer guiding dog through drills",
+    span: "normal",
+  },
+  {
+    id: 9,
+    category: "staff",
+    title: "Expert Teams",
+    image: "/images/gallery/0214_York-118.jpg",
+    alt: "Expert trainer in the field",
+    span: "tall",
+  },
+];
+
+const filters = [
+  { id: "all", label: "All" },
+  { id: "handlers-course", label: "Handlers Course" },
+  { id: "bootcamp", label: "Bootcamp" },
+  { id: "facility", label: "Facility" },
+  { id: "staff", label: "Staff" },
+  { id: "dogs", label: "Dogs" },
+];
+
+const EAGER_COUNT = 4; // first N images load immediately
+---
+
+<section id="gallery" class="gallery-section">
+  <div class="gallery-inner">
+    <!-- Header -->
+    <header class="gallery-header">
+      <p class="gallery-eyebrow">Our Gallery</p>
+      <h2 class="gallery-title">See Us In Action</h2>
+      <p class="gallery-subtitle">
+        Explore world-class training programs, expert staff, and the amazing
+        transformations of the dogs we work with.
+      </p>
+    </header>
+
+    <!-- Filter bar -->
+    <nav
+      class="gallery-filters"
+      id="gallery-filters"
+      aria-label="Gallery filters"
+    >
+      {
+        filters.map((f) => (
+          <button
+            class="gf-btn"
+            data-filter={f.id}
+            aria-pressed={f.id === "all" ? "true" : "false"}
+          >
+            {f.label}
+          </button>
+        ))
+      }
+    </nav>
+
+    <!-- Grid — data-filter attribute drives CSS visibility -->
+    <div class="gallery-grid" id="gallery-grid" data-filter="all">
+      {
+        galleryItems.map((item, i) => (
+          <figure class={`gi gi--${item.span}`} data-category={item.category}>
+            <img
+              src={item.image}
+              alt={item.alt}
+              loading={i < EAGER_COUNT ? "eager" : "lazy"}
+              decoding={i < EAGER_COUNT ? "sync" : "async"}
+              fetchpriority={i === 0 ? "high" : undefined}
+              sizes="(max-width: 480px) 100vw,
+                   (max-width: 768px) 50vw,
+                   (max-width: 1280px) 33vw,
+                   25vw"
+              class="gi__img"
+            />
+            <figcaption class="gi__caption">
+              <span class="gi__cat">{item.category.replace(/-/g, " ")}</span>
+              <strong class="gi__title">{item.title}</strong>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Minimal JS: toggle one attribute, CSS does the rest -->
+<script>
+  function boot() {
+    const nav = document.getElementById("gallery-filters");
+    const grid = document.getElementById("gallery-grid");
+    if (!nav || !grid) return;
+
+    nav.addEventListener("click", (e) => {
+      const btn = (e.target as Element).closest<HTMLButtonElement>(".gf-btn");
+      if (!btn) return;
+
+      const filter = btn.dataset.filter ?? "all";
+
+      // Swap active button
+      nav.querySelectorAll<HTMLButtonElement>(".gf-btn").forEach((b) => {
+        const active = b === btn;
+        b.dataset.active = active ? "true" : "false";
+        b.setAttribute("aria-pressed", String(active));
+      });
+
+      // One DOM write — CSS selectors take over
+      grid.dataset.filter = filter;
+    });
+  }
+
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>
+
+<style>
+  /* ─────────────────────────────────────────────
+     Section shell
+  ───────────────────────────────────────────── */
+  .gallery-section {
+    padding: clamp(3rem, 8vw, 6rem) 1rem;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .gallery-inner {
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+
+  /* ─────────────────────────────────────────────
+     Header
+  ───────────────────────────────────────────── */
+  .gallery-header {
+    text-align: center;
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .gallery-eyebrow {
+    color: #059669;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  .gallery-title {
+    font-size: clamp(2rem, 6vw, 3.75rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #111827;
+    margin: 0 0 1rem;
+    line-height: 1;
+  }
+
+  .gallery-subtitle {
+    color: #6b7280;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    max-width: 40ch;
+    margin-inline: auto;
+    line-height: 1.6;
+  }
+
+  /* ─────────────────────────────────────────────
+     Filter bar
+  ───────────────────────────────────────────── */
+  .gallery-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .gf-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    color: #6b7280;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 200ms,
+      color 200ms,
+      border-color 200ms,
+      transform 200ms,
+      box-shadow 200ms;
+    /* prevent layout shift on scale */
+    will-change: transform;
+  }
+
+  .gf-btn:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #d1d5db;
+  }
+
+  /* Active state — toggled via data-active attribute */
+  .gf-btn[data-active="true"],
+  .gf-btn[aria-pressed="true"] {
+    background: #111827;
+    color: #fff;
+    border-color: #111827;
+    transform: scale(1.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+
+  /* ─────────────────────────────────────────────
+     Masonry-style grid via CSS columns
+  ───────────────────────────────────────────── */
+  .gallery-grid {
+    columns: 1;
+    column-gap: 1rem;
+  }
+
+  @media (min-width: 480px) {
+    .gallery-grid {
+      columns: 2;
+    }
+  }
+  @media (min-width: 768px) {
+    .gallery-grid {
+      columns: 3;
+    }
+  }
+  @media (min-width: 1024px) {
+    .gallery-grid {
+      columns: 4;
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     Gallery item
+  ───────────────────────────────────────────── */
+  .gi {
+    break-inside: avoid;
+    margin: 0 0 1rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background: #e5e7eb;
+    /* GPU layer for smooth transitions */
+    will-change: opacity, transform;
+    /* Show/hide transition */
+    transition:
+      opacity 280ms ease,
+      transform 280ms ease;
+  }
+
+  /* Span variants — affects image aspect ratio to create masonry feel */
+  .gi--normal img {
+    aspect-ratio: 4 / 3;
+  }
+  .gi--tall img {
+    aspect-ratio: 3 / 4;
+  }
+  .gi--wide img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .gi__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 600ms ease;
+  }
+
+  .gi:hover .gi__img {
+    transform: scale(1.06);
+  }
+
+  /* Caption overlay */
+  .gi__caption {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.2) 50%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .gi:hover .gi__caption,
+  .gi:focus-within .gi__caption {
+    opacity: 1;
+  }
+
+  .gi__cat {
+    display: block;
+    color: #34d399;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+    translate: 0 0.5rem;
+    transition: translate 260ms ease;
+  }
+
+  .gi__title {
+    display: block;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    translate: 0 0.5rem;
+    transition: translate 280ms 40ms ease;
+  }
+
+  .gi:hover .gi__cat,
+  .gi:hover .gi__title,
+  .gi:focus-within .gi__cat,
+  .gi:focus-within .gi__title {
+    translate: 0 0;
+  }
+
+  /* ─────────────────────────────────────────────
+     CSS filter logic — ONE selector per state.
+     The grid's data-filter drives everything.
+  ───────────────────────────────────────────── */
+
+  /* When a specific filter is active, hide non-matching items */
+  .gallery-grid:not([data-filter="all"]) .gi {
+    opacity: 0;
+    transform: scale(0.94);
+    pointer-events: none;
+    /* collapse the box so the columns reflow */
+    max-height: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  /* Show only items whose category matches the active filter */
+  .gallery-grid[data-filter="handlers-course"]
+    .gi[data-category="handlers-course"],
+  .gallery-grid[data-filter="bootcamp"] .gi[data-category="bootcamp"],
+  .gallery-grid[data-filter="facility"] .gi[data-category="facility"],
+  .gallery-grid[data-filter="staff"] .gi[data-category="staff"],
+  .gallery-grid[data-filter="dogs"] .gi[data-category="dogs"],
+  .gallery-grid[data-filter="all"] .gi {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    max-height: none;
+    margin: 0 0 1rem;
+    overflow: visible;
+  }
+</style>
