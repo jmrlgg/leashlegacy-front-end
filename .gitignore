@@ -1,4 +1,14 @@
 node_modules
 .env
+.env.*
 __pycache__/
 *.sqlite3
+
+# Build output — never commit
+dist/
+.astro/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.local

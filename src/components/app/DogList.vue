@@ -2,9 +2,12 @@
 import { ref, computed, onMounted } from "vue"
 import { createPinia, setActivePinia } from "pinia"
 import { useDogStore } from "@/stores/dogStore"
+import DogTrainingPanel from "@/components/app/DogTrainingPanel.vue"
+import { dogPersistPlugin } from "@/lib/dogPersist.js"
 
 // Bootstrap Pinia for this Astro island
 const pinia = createPinia()
+pinia.use(dogPersistPlugin)   // persist dogStore ↔ localStorage
 setActivePinia(pinia)
 
 const dogs = useDogStore()
@@ -12,8 +15,17 @@ const dogs = useDogStore()
 // ── Modal state ────────────────────────────────────────────────────
 const showAddModal   = ref(false)
 const deleteTarget   = ref(null)   // dog id pending removal
+const trainingTarget = ref(null)   // dog id for training panel
 const toast          = ref(null)   // { message, type }
 let   toastTimer     = null
+
+// ── Training Panel ─────────────────────────────────────────────────
+function openTraining(id) {
+  trainingTarget.value = id
+}
+function closeTraining() {
+  trainingTarget.value = null
+}
 
 // ── Add-dog form ───────────────────────────────────────────────────
 const form = ref({ name: "", breed: "", age: "", tags: "" })
@@ -146,6 +158,14 @@ const dogList = computed(() => dogs.allDogs)
           </template>
           <template v-else>
             <button
+              class="btn-training"
+              :id="`training-dog-${dog.id}`"
+              @click="openTraining(dog.id)"
+              title="View training profile"
+            >
+              📋 Training
+            </button>
+            <button
               class="btn-delete"
               :id="`delete-dog-${dog.id}`"
               @click="confirmDelete(dog.id)"
@@ -240,6 +260,13 @@ const dogList = computed(() => dogs.allDogs)
         {{ toast.message }}
       </div>
     </Transition>
+
+    <!-- ─── Training Panel ───────────────────────────────────────── -->
+    <DogTrainingPanel
+      v-if="trainingTarget"
+      :dog-id="trainingTarget"
+      @close="closeTraining"
+    />
 
   </section>
 </template>
@@ -470,6 +497,27 @@ const dogList = computed(() => dogs.allDogs)
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.btn-training {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #faf5ff;
+  border: 1.5px solid #ddd6fe;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #7c3aed;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+.btn-training:hover {
+  background: #ede8ff;
+  border-color: #c4b5fd;
 }
 
 .btn-delete {
